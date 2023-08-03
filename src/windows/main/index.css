@@ -1,0 +1,24 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: auto;
+  max-width: 38rem;
+  padding: 2rem;
+}
+
+.volume {
+  width: 100%;
+}
+
+.track {
+  border: 2px solid lightblue;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0px;
+}
+
+.dynamic {
+  border: 1px solid green;
+  width: 0%;
+  background-color: aquamarine;
+}
