@@ -28,7 +28,10 @@ export interface ModeFree {
   };
 }
 
-export type CatalogItem = Pick<SongManifest, "band" | "title">;
+export type CatalogItem = Pick<SongManifest, "band" | "title"> & {
+  hasBandMode: boolean;
+  hasFreeMode: boolean;
+};
 
 export type Catalog = {
   [folder: string]: CatalogItem;

@@ -17,12 +17,7 @@ int pressedYELLOW = 0;
 int pressedBLUE = 0;
 int pressedORANGE = 0;
 
-int pressedSTRUMUP = 0;
-
-std::array<int, 6> state;
-// char state[6];
-
-//Test
+bool strumable = true;
 
 void setup() {
   Serial.begin(115200);
@@ -50,32 +45,31 @@ void setup() {
   Serial.println(WiFi.localIP());
 }
 
+void send(char str[12]) {
+  Serial.println(str);
+  udp.beginPacket("192.168.1.28", 2222);
+  udp.write(str);
+  udp.endPacket();
+}
+
 void loop() {
-  pressedGREEN = !digitalRead(inPinGREEN);
-  pressedRED = !digitalRead(inPinRED);
-  pressedYELLOW = !digitalRead(inPinYELLOW);
-  pressedBLUE = !digitalRead(inPinBLUE);
-  pressedORANGE = !digitalRead(inPinORANGE);
-  pressedSTRUMUP = digitalRead(inPinSTRUMUP);
-  // isStrumDown = digitalRead(inStrumDown);
+  if (strumable && digitalRead(inPinSTRUMUP) == 1) {
+    strumable = false;
 
-  std::array<int, 6> loopState = { pressedGREEN,
-                                   pressedRED,
-                                   pressedYELLOW,
-                                   pressedBLUE,
-                                   pressedORANGE,
-                                   pressedSTRUMUP };
-
-  if (loopState != state) {
-    state = loopState;
+    pressedGREEN = !digitalRead(inPinGREEN);
+    pressedRED = !digitalRead(inPinRED);
+    pressedYELLOW = !digitalRead(inPinYELLOW);
+    pressedBLUE = !digitalRead(inPinBLUE);
+    pressedORANGE = !digitalRead(inPinORANGE);
 
     char str[12];
-    sprintf(str, "G%iR%iY%iB%iO%iS%i", loopState[0],loopState[1],loopState[2],loopState[3],loopState[4],loopState[5]);
+    sprintf(str, "G%iR%iY%iB%iO%iS%i", pressedGREEN, pressedRED, pressedYELLOW, pressedBLUE, pressedORANGE, 0);
+    send(str);
+  }
 
-    Serial.println(str);
-    udp.beginPacket("192.168.1.28", 2222);
-    udp.write(str);
-    udp.endPacket();
+  if (!strumable && digitalRead(inPinSTRUMUP) == 0) {
+    strumable = true;
+    send("G0R0Y0B0O0S0");
   }
 
   delay(50);

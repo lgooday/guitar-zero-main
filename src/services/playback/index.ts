@@ -7,31 +7,31 @@ export class Playback {
   #howls: Howl[];
   #manifest: SongManifest;
   #rockableIndices: number[] = [];
+  #mode: "band" | "free";
+  #freeModeSample: string;
   #fadeInterval: NodeJS.Timer;
   public eventEmitter: EventEmitter = new EventEmitter();
 
   constructor(private path: string) {}
 
-  async init() {
-    const { howls, manifest } = await howlFactory(this.path);
+  async init(mode: "band" | "free") {
+    const { howls, manifest } = await howlFactory(this.path, mode);
     this.#howls = howls;
     this.#manifest = manifest;
-  }
+    this.#mode = mode;
 
-  playSample(sample: string) {
-    this.stop();
-
-    this.#howls[0].play("mi2theme:YELLOW");
+    if (mode === "band") {
+      this.#rockableIndices = [];
+      this.#manifest.modes["band"]!.tracks.forEach((track) => {
+        const howIndex = Object.keys(this.#manifest.tracks).indexOf(track);
+        this.#howls[howIndex].volume(0);
+        this.#rockableIndices.push(howIndex);
+      });
+    }
   }
 
   play() {
-    this.#howls.forEach((h) => h.play("full"));
-    this.#rockableIndices = [];
-    this.#manifest.modes["band"]!.tracks.forEach((track) => {
-      const howIndex = Object.keys(this.#manifest.tracks).indexOf(track);
-      this.#howls[howIndex].volume(0);
-      this.#rockableIndices.push(howIndex);
-    });
+    this.#howls.forEach((h) => h.play());
   }
 
   pause() {
@@ -45,24 +45,48 @@ export class Playback {
     });
   }
 
+  setSample(sampleName: string) {
+    if (this.#mode === "free") {
+      this.#freeModeSample = sampleName;
+
+      this.#howls.forEach((_, i) => this.volume(i, 0));
+
+      this.#rockableIndices = [];
+      this.#manifest.modes["free"][sampleName].tracks.forEach((track) => {
+        const howIndex = Object.keys(this.#manifest.tracks).indexOf(track);
+        this.volume(howIndex, 1);
+        this.#rockableIndices.push(howIndex);
+      });
+    }
+  }
+
   rock(pressed: string[]) {
     console.log(pressed);
 
-    // const duration = 800;
+    if (this.#mode === "band") {
+      const duration = 800;
+      this.#rockableTrackVolume = 1;
 
-    // this.#rockableTrackVolume = 1;
+      if (!this.#fadeInterval) {
+        this.#fadeInterval = setInterval(() => {
+          if (this.#rockableTrackVolume > 0.1) {
+            this.#rockableTrackVolume = this.#rockableTrackVolume - 0.1;
+          } else {
+            clearInterval(this.#fadeInterval);
+            this.#fadeInterval = null;
+            this.#rockableTrackVolume = 0;
+          }
+        }, duration / 10);
+      }
+    }
 
-    // if (!this.#fadeInterval) {
-    //   this.#fadeInterval = setInterval(() => {
-    //     if (this.#rockableTrackVolume > 0.1) {
-    //       this.#rockableTrackVolume = this.#rockableTrackVolume - 0.1;
-    //     } else {
-    //       clearInterval(this.#fadeInterval);
-    //       this.#fadeInterval = null;
-    //       this.#rockableTrackVolume = 0;
-    //     }
-    //   }, duration / 10);
-    // }
+    if (this.#mode === "free") {
+      this.#howls.forEach((howl, i) => {
+        if (this.#rockableIndices.includes(i)) {
+          howl.play(`${this.#freeModeSample}:${pressed[0]}`);
+        }
+      });
+    }
   }
 
   seek(offset: number) {
@@ -76,16 +100,13 @@ export class Playback {
   set #rockableTrackVolume(vol: number) {
     this.#howls.forEach((_, i) => {
       if (this.#rockableIndices.includes(i)) {
-        this.volume(i, vol, true);
+        this.volume(i, vol);
       }
     });
   }
 
-  volume(index: number, volume: number, emit: boolean = false) {
+  volume(index: number, volume: number) {
     this.#howls[index].volume(volume);
-    if (emit) {
-      this.eventEmitter.emit("volume:change", { val: volume * 100, index });
-    }
   }
 
   get elapsed() {

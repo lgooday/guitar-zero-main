@@ -9,9 +9,9 @@ let elapsedTimer: number = window.setInterval(showElapsed, 1000);
 
 /** MODE BAND */
 const seekInput = getById<HTMLInputElement & { max: string }>("seek");
-const buttonPlay = getById<HTMLButtonElement>("btn_play");
-const buttonPause = getById<HTMLButtonElement>("btn_pause");
-const buttonStop = getById<HTMLButtonElement>("btn_stop");
+const buttonBandPlay = getById<HTMLButtonElement>("btn_band_play");
+const buttonBandPause = getById<HTMLButtonElement>("btn_band_pause");
+const buttonBandStop = getById<HTMLButtonElement>("btn_band_stop");
 
 /** NOTES */
 const divNoteGreen = getById<HTMLDivElement>("div_note_green");
@@ -21,13 +21,18 @@ const divNoteBlue = getById<HTMLDivElement>("div_note_blue");
 const divNoteOrange = getById<HTMLDivElement>("div_note_orange");
 const divNoteStrum = getById<HTMLDivElement>("div_note_strum");
 
+/** MISC */
+const divCatalog = getById<HTMLDivElement>("div_catalog");
+const divModeBand = getById<HTMLDivElement>("div_mode_band");
+const divModeFree = getById<HTMLDivElement>("div_mode_free");
+
 /** MODE FREE */
 const divSamples = getById<HTMLDivElement>("div_samples");
 
 /** EVENTS */
-buttonPlay.addEventListener("click", play);
-buttonStop.addEventListener("click", stop);
-buttonPause.addEventListener("click", pause);
+buttonBandPlay.addEventListener("click", bandPlay);
+buttonBandStop.addEventListener("click", bandStop);
+buttonBandPause.addEventListener("click", bandPause);
 seekInput.addEventListener("click", seek);
 window.addEventListener("load", windowLoaded);
 
@@ -46,11 +51,7 @@ function showElapsed() {
   }
 }
 
-async function changeSong(folder: string) {
-  const divModes = document.getElementsByClassName("div_modes")[0];
-
-  divModes.classList.add("hidden");
-
+async function changeSong(folder: string, mode: "band" | "free") {
   setSongContainerStatus("none");
   setSongContainerStatus("loading", folder);
   if (playback) {
@@ -58,45 +59,47 @@ async function changeSong(folder: string) {
   }
 
   playback = new Playback(folder);
-
-  await playback.init();
+  await playback.init(mode);
 
   setSongContainerStatus("loaded", folder);
 
-  divModes.classList.remove("hidden");
+  divModeBand.classList.add("hidden");
+  divModeFree.classList.add("hidden");
 
-  const divModeBand = getById<HTMLDivElement>("mode_song");
-  if (playback.hasMode("band")) {
+  if (mode === "band") {
     divModeBand.classList.remove("hidden");
-
-    buttonStop.classList.add("hidden");
-    buttonPause.classList.add("hidden");
-    buttonPlay.classList.remove("hidden");
     seekInput.value = "0";
     seekInput.max = playback.duration.toString();
-  } else {
-    divModeBand.classList.remove("add");
   }
 
-  const divModeFree = getById<HTMLDivElement>("mode_free");
-  if (playback.hasMode("free")) {
+  if (mode === "free") {
     divModeFree.classList.remove("hidden");
+    divSamples.textContent = "";
 
     playback.getFreeModeSamples().forEach((sample) => {
-      const startButton = createEl<HTMLButtonElement>("button");
-      startButton.textContent = sample;
-      startButton.addEventListener("click", () => playSample(sample));
+      const sampleDiv = createEl<HTMLDivElement>("div");
+      sampleDiv.classList.add("div_sample");
+      sampleDiv.id = sample;
+      sampleDiv.textContent = sample;
+      sampleDiv.addEventListener("click", () => selectSample(sample));
 
-      const sampleContainer = createEl<HTMLDivElement>("div");
-      const sampleName = createEl<HTMLSpanElement>("span");
-      sampleContainer.append(sampleName);
-      sampleContainer.append(startButton);
-
-      divSamples.append(sampleContainer);
+      divSamples.append(sampleDiv);
     });
-  } else {
-    divModeFree.classList.remove("add");
   }
+}
+
+function selectSample(sample: string) {
+  [...document.getElementsByClassName("div_sample")].forEach(
+    (element, index) => {
+      if (element.id === sample) {
+        element.classList.add("selected");
+      } else {
+        element.classList.remove("selected");
+      }
+    }
+  );
+
+  playback.setSample(sample);
 }
 
 async function setSongContainerStatus(
@@ -118,8 +121,6 @@ async function setSongContainerStatus(
 async function windowLoaded() {
   const catalog = await songService.getCatalog();
 
-  const songsDiv = getById("div_songs");
-
   for (const [folder, song] of Object.entries(catalog)) {
     const songDiv = createEl<HTMLDivElement>("div");
     songDiv.className = "songContainer";
@@ -138,37 +139,42 @@ async function windowLoaded() {
     titleNode.textContent = song.title;
     songDiv.appendChild(titleNode);
 
-    songDiv.addEventListener("click", async () => {
-      await changeSong(folder);
+    const bandModeNode = createEl<HTMLButtonElement>("button");
+    bandModeNode.textContent = "Band Mode";
+    bandModeNode.classList.add("btn_mode");
+    bandModeNode.disabled = !song.hasBandMode;
+
+    bandModeNode.addEventListener("click", () => {
+      changeSong(folder, "band");
     });
 
-    songsDiv.appendChild(songDiv);
+    songDiv.appendChild(bandModeNode);
+
+    const freeModeNode = createEl<HTMLButtonElement>("button");
+    freeModeNode.textContent = "Free Mode";
+    freeModeNode.classList.add("btn_mode");
+    freeModeNode.disabled = !song.hasFreeMode;
+
+    freeModeNode.addEventListener("click", () => {
+      changeSong(folder, "free");
+    });
+
+    songDiv.appendChild(freeModeNode);
+
+    divCatalog.appendChild(songDiv);
   }
 }
 
-async function playSample(sample: string) {
-  playback.playSample(sample);
-}
-
-async function play() {
+async function bandPlay() {
   playback.play();
-  buttonStop.classList.remove("hidden");
-  buttonPause.classList.remove("hidden");
-  buttonPlay.classList.add("hidden");
 }
 
-async function pause() {
+async function bandPause() {
   playback.pause();
-  buttonStop.classList.add("hidden");
-  buttonPause.classList.remove("hidden");
-  buttonPlay.classList.remove("hidden");
 }
 
-async function stop() {
+async function bandStop() {
   playback.stop();
-  buttonStop.classList.add("hidden");
-  buttonPause.classList.add("hidden");
-  buttonPlay.classList.remove("hidden");
 }
 
 function blinkNote(
@@ -192,7 +198,7 @@ ipcRenderer.on("playback:note", (trame: string) => {
   blinkNote("RED", divNoteRed);
   blinkNote("GREEN", divNoteGreen);
   blinkNote("STRUMUP", divNoteStrum);
-  if (playback) {
+  if (playback && pressed.length) {
     playback.rock(pressed);
   }
 });

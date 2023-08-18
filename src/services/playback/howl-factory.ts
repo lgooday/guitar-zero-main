@@ -1,7 +1,7 @@
 import { Howl } from "howler";
 import { songService } from "../songs";
 
-export async function howlFactory(folder: string) {
+export async function howlFactory(folder: string, mode: "band" | "free") {
   try {
     const manifest = await songService.getManifest(folder);
 
@@ -10,10 +10,9 @@ export async function howlFactory(folder: string) {
     const loaded: Promise<void>[] = [];
 
     for (const [trackName, value] of Object.entries(manifest.tracks)) {
-      let notesInTrack: any = {
-        full: [0, 600000],
-      };
-      if (manifest.modes.free) {
+      const notesInTrack: any = {};
+
+      if (mode === "free") {
         for (const [sampleName, sampleInfo] of Object.entries(
           manifest.modes.free
         )) {
@@ -35,7 +34,9 @@ export async function howlFactory(folder: string) {
               volume: 1,
               onload: () => res(),
               onloaderror: rej,
-              sprite: notesInTrack,
+              sprite: Object.keys(notesInTrack).length
+                ? notesInTrack
+                : undefined,
             })
           );
         })

@@ -29,47 +29,47 @@
     </svg>
   </head>
   <body id="main">
-    <h1>Guitar Zero 🤘</h1>
-
-    <div id="div_notes">
-      <div class="note green" id="div_note_green"></div>
-      <div class="note red" id="div_note_red"></div>
-      <div class="note yellow" id="div_note_yellow"></div>
-      <div class="note blue" id="div_note_blue"></div>
-      <div class="note orange" id="div_note_orange"></div>
-      <div class="note strum" id="div_note_strum">S</div>
+    <div class="header">
+      <h1>🤘 Guitar Zero</h1>
+      <div class="push"></div>
+      <div id="div_notes">
+        <div class="note green" id="div_note_green"></div>
+        <div class="note red" id="div_note_red"></div>
+        <div class="note yellow" id="div_note_yellow"></div>
+        <div class="note blue" id="div_note_blue"></div>
+        <div class="note orange" id="div_note_orange"></div>
+        <div class="note strum" id="div_note_strum">S</div>
+      </div>
     </div>
 
-    <div id="div_songs"></div>
+    <div id="div_catalog"></div>
 
-    <div class="div_modes hidden">
-      <div id="mode_song">
-        <h2>🤘 mode: song</h2>
-        <hr />
+    <div id="div_mode_band" class="hidden">
+      <h2>🤘 mode: song</h2>
+      <hr />
 
-        <div class="buttons">
-          <svg class="button" id="btn_play">
-            <use xlink:href="#play-button-shape"></use>
-          </svg>
-          <svg class="button" id="btn_stop">
-            <use xlink:href="#stop-button-shape"></use>
-          </svg>
-          <svg class="button" id="btn_pause">
-            <use xlink:href="#pause-button-shape"></use>
-          </svg>
-        </div>
-
-        <div>
-          <input type="range" id="seek" min="0" max="100" class="seek" />
-          <label for="seek" id="label_seek"></label>
-        </div>
+      <div class="buttons">
+        <svg class="button" id="btn_band_play">
+          <use xlink:href="#play-button-shape"></use>
+        </svg>
+        <svg class="button" id="btn_band_stop">
+          <use xlink:href="#stop-button-shape"></use>
+        </svg>
+        <svg class="button" id="btn_band_pause">
+          <use xlink:href="#pause-button-shape"></use>
+        </svg>
       </div>
-      <div id="mode_free">
-        <h2>🤘 mode: free</h2>
-        <hr />
 
-        <div id="div_samples"></div>
+      <div>
+        <input type="range" id="seek" min="0" max="100" class="seek" />
+        <label for="seek" id="label_seek"></label>
       </div>
+    </div>
+    <div id="div_mode_free" class="hidden">
+      <h2>🤘 mode: free</h2>
+      <hr />
+
+      <div id="div_samples"></div>
     </div>
   </body>
 </html>
