@@ -5,22 +5,71 @@
     <title>Guitar Zero</title>
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline' data: http://127.0.0.1:8080; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:"
+      content="default-src 'self' 'unsafe-inline' data: http://192.168.1.15:48666 https://fonts.cdnfonts.com; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; "
     />
+
+    <svg class="defs">
+      <defs>
+        <path
+          id="pause-button-shape"
+          d="M24,0C10.745,0,0,10.745,0,24s10.745,24,24,24s24-10.745,24-24S37.255,0,24,0z M21,33.064c0,2.201-1.688,4-3.75,4
+	s-3.75-1.799-3.75-4V14.934c0-2.199,1.688-4,3.75-4s3.75,1.801,3.75,4V33.064z M34.5,33.064c0,2.201-1.688,4-3.75,4
+	s-3.75-1.799-3.75-4V14.934c0-2.199,1.688-4,3.75-4s3.75,1.801,3.75,4V33.064z"
+        />
+        <path
+          id="play-button-shape"
+          d="M24,0C10.745,0,0,10.745,0,24s10.745,24,24,24s24-10.745,24-24S37.255,0,24,0z M31.672,26.828l-9.344,9.344
+	C20.771,37.729,19.5,37.2,19.5,35V13c0-2.2,1.271-2.729,2.828-1.172l9.344,9.344C33.229,22.729,33.229,25.271,31.672,26.828z"
+        />
+        <path
+          id="stop-button-shape"
+          d="M 24 0 C 10.745 0 0 10.745 0 24 s 10.745 24 24 24 s 24 -10.745 24 -24 S 37.255 0 24 0 z M 35 36 C 24 36 20 36 13 36 V 12 l 22 0 z"
+        />
+      </defs>
+    </svg>
   </head>
   <body id="main">
-    <select id="slc_songs"></select>
-    <button id="btn_play">play</button>
-    <button id="btn_pause">pause</button>
-    <button id="btn_stop">stop</button>
+    <h1>Guitar Zero 🤘</h1>
 
-    <div>
-      <input type="range" id="seek" min="0" max="100" class="seek" />
-      <label for="seek"></label>
+    <div id="div_notes">
+      <div class="note green" id="div_note_green"></div>
+      <div class="note red" id="div_note_red"></div>
+      <div class="note yellow" id="div_note_yellow"></div>
+      <div class="note blue" id="div_note_blue"></div>
+      <div class="note orange" id="div_note_orange"></div>
+      <div class="note strum" id="div_note_strum">S</div>
     </div>
 
-    <div id="div_tracks"></div>
+    <div id="div_songs"></div>
 
-    <textarea id="debug"></textarea>
+    <div class="div_modes hidden">
+      <div id="mode_song">
+        <h2>🤘 mode: song</h2>
+        <hr />
+
+        <div class="buttons">
+          <svg class="button" id="btn_play">
+            <use xlink:href="#play-button-shape"></use>
+          </svg>
+          <svg class="button" id="btn_stop">
+            <use xlink:href="#stop-button-shape"></use>
+          </svg>
+          <svg class="button" id="btn_pause">
+            <use xlink:href="#pause-button-shape"></use>
+          </svg>
+        </div>
+
+        <div>
+          <input type="range" id="seek" min="0" max="100" class="seek" />
+          <label for="seek" id="label_seek"></label>
+        </div>
+      </div>
+      <div id="mode_free">
+        <h2>🤘 mode: free</h2>
+        <hr />
+
+        <div id="div_samples"></div>
+      </div>
+    </div>
   </body>
 </html>

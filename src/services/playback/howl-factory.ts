@@ -1,55 +1,50 @@
-import { Howl, Howler } from "howler";
-// import got from "got";
-
-const host = "http://192.168.1.28:8080";
-
-interface Manifest {
-  version: number;
-  band: string;
-  title: string;
-  art: string;
-  tracks: Tracks;
-  debug?: Debug;
-}
-
-interface Tracks {
-  guitar: Track;
-  bass: Track;
-  drums: Track;
-  vocals: Track;
-}
-
-interface Debug {
-  startOffset?: number;
-}
-
-export interface Track {
-  file: string;
-  isGame?: true;
-}
+import { Howl } from "howler";
+import { songService } from "../songs";
 
 export async function howlFactory(folder: string) {
   try {
-    const manifestCall = await fetch(`${host}/${folder}/manifest.json`, {
-      cache: "no-store",
-    });
-    const manifest = (await manifestCall.json()) as Manifest;
+    const manifest = await songService.getManifest(folder);
 
-    const howls = [];
-    const tracks = [];
+    const howls: Howl[] = [];
 
-    for (const [key, value] of Object.entries(manifest.tracks)) {
-      howls.push(
-        new Howl({
-          src: `${host}/${folder}/${value.file}`,
-          volume: value.isGame ? 0 : 1,
+    const loaded: Promise<void>[] = [];
+
+    for (const [trackName, value] of Object.entries(manifest.tracks)) {
+      let notesInTrack: any = {
+        full: [0, 600000],
+      };
+      if (manifest.modes.free) {
+        for (const [sampleName, sampleInfo] of Object.entries(
+          manifest.modes.free
+        )) {
+          if (sampleInfo.tracks.includes(trackName)) {
+            for (const [notesOfSample, sprite] of Object.entries(
+              sampleInfo.notes
+            )) {
+              notesInTrack[`${sampleName}:${notesOfSample}`] = sprite;
+            }
+          }
+        }
+      }
+
+      loaded.push(
+        new Promise((res, rej) => {
+          howls.push(
+            new Howl({
+              src: songService.getTrackUri(folder, value.file),
+              volume: 1,
+              onload: () => res(),
+              onloaderror: rej,
+              sprite: notesInTrack,
+            })
+          );
         })
       );
-
-      tracks.push({ key, rockable: value.isGame });
     }
 
-    return { howls, tracks };
+    await Promise.allSettled(loaded);
+
+    return { howls, manifest };
   } catch (e: any) {
     console.error(e);
     throw e;

@@ -1,9 +1,147 @@
+@import url("https://fonts.cdnfonts.com/css/burned-gothic");
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  padding: 1rem;
+  background-color: #000;
+  color: white;
+}
+
+h1 {
+  font-family: "Burned Gothic", sans-serif;
+  padding: 0rem;
+  text-align: center;
+}
+
+h2 {
+  font-family: "Burned Gothic", sans-serif;
+  text-align: center;
+  margin: 0;
+}
+
+h4 {
+  margin: 0px 0px 10px 0px;
+  text-align: center;
+}
+
+h5 {
+  margin: 10px 0px 0px 0px;
+  text-align: center;
+}
+
+#div_notes {
+  border: 0px solid white;
+  border-radius: 10px;
+  margin: 5px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+
+  .note {
+    width: 60px;
+    height: 60px;
+    border-radius: 100%;
+    margin: 10px;
+    border: 2px solid white;
+    opacity: 0.3;
+
+    &.pressed {
+      opacity: 1;
+    }
+
+    &.orange {
+      background-color: orange;
+    }
+
+    &.blue {
+      background-color: blue;
+    }
+
+    &.yellow {
+      background-color: #ffed00;
+    }
+
+    &.red {
+      background-color: red;
+    }
+
+    &.green {
+      background-color: greenyellow;
+    }
+
+    &.strum {
+      background-color: black;
+      line-height: 60px;
+      font-size: 2em;
+      font-weight: bolder;
+
+      text-align: center;
+    }
+  }
+}
+
+.div_modes {
+  display: flex;
+
+  > div {
+    border: 2px solid white;
+    border-radius: 10px;
+    margin: 5px;
+    width: 50%;
+    padding: 10px;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+#div_songs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.songContainer {
+  border: 2px solid white;
+  border-radius: 10px;
+  margin: 5px;
+  padding: 10px;
+  width: 150px;
+  cursor: pointer;
+
+  &.loading {
+    border-color: red;
+
+    .bandImg {
+      animation: blink normal 1s infinite ease-in-out;
+    }
+  }
+
+  &.selected {
+    border-color: #ffed00;
+  }
+
+  &.blur {
+    opacity: 0.4;
+  }
+}
+
+.bandImg {
+  width: 100%;
+  height: 100px;
 }
 
 .volume {
@@ -21,4 +159,31 @@ body {
   border: 1px solid green;
   width: 0%;
   background-color: aquamarine;
+}
+
+.seek {
+  width: 100%;
+}
+
+/** buttons **/
+
+.buttons {
+  text-align: center;
+}
+
+.button {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  fill: red;
+  stroke: red;
+  &:hover {
+    fill: red;
+  }
+}
+
+.defs {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
 }

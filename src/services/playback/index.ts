@@ -1,44 +1,41 @@
 import { Howl } from "howler";
 import { howlFactory } from "./howl-factory";
 import { EventEmitter } from "events";
+import { SongManifest } from "../../types";
 
 export class Playback {
   #howls: Howl[];
-  #trackInfo: { key: string; rockable: boolean }[];
+  #manifest: SongManifest;
   #rockableIndices: number[] = [];
-  #playing: boolean = false;
   #fadeInterval: NodeJS.Timer;
   public eventEmitter: EventEmitter = new EventEmitter();
 
   constructor(private path: string) {}
 
   async init() {
-    const factory = await howlFactory(this.path);
-    this.#howls = factory.howls;
-    this.#trackInfo = factory.tracks;
+    const { howls, manifest } = await howlFactory(this.path);
+    this.#howls = howls;
+    this.#manifest = manifest;
+  }
 
-    this.#rockableIndices = this.#trackInfo.reduce((acc, ti, i) => {
-      if (ti.rockable) {
-        acc.push(i);
-      }
-      return acc;
-    }, []);
+  playSample(sample: string) {
+    this.stop();
 
-    return this.#trackInfo;
+    this.#howls[0].play("mi2theme:YELLOW");
   }
 
   play() {
-    if (!this.#playing) {
-      this.#howls.forEach((h) => h.play());
-      this.#playing = true;
-    } else {
-      this.pause();
-    }
+    this.#howls.forEach((h) => h.play("full"));
+    this.#rockableIndices = [];
+    this.#manifest.modes["band"]!.tracks.forEach((track) => {
+      const howIndex = Object.keys(this.#manifest.tracks).indexOf(track);
+      this.#howls[howIndex].volume(0);
+      this.#rockableIndices.push(howIndex);
+    });
   }
 
   pause() {
     this.#howls.forEach((h) => h.pause());
-    this.#playing = false;
   }
 
   stop() {
@@ -46,25 +43,30 @@ export class Playback {
       h.stop();
       h.seek(0);
     });
-    this.#playing = false;
   }
 
-  rock() {
-    const duration = 800;
+  rock(pressed: string[]) {
+    console.log(pressed);
 
-    this.#rockableTrackVolume = 1;
+    // const duration = 800;
 
-    if (!this.#fadeInterval) {
-      this.#fadeInterval = setInterval(() => {
-        if (this.#rockableTrackVolume > 0.1) {
-          this.#rockableTrackVolume = this.#rockableTrackVolume - 0.1;
-        } else {
-          clearInterval(this.#fadeInterval);
-          this.#fadeInterval = null;
-          this.#rockableTrackVolume = 0;
-        }
-      }, duration / 10);
-    }
+    // this.#rockableTrackVolume = 1;
+
+    // if (!this.#fadeInterval) {
+    //   this.#fadeInterval = setInterval(() => {
+    //     if (this.#rockableTrackVolume > 0.1) {
+    //       this.#rockableTrackVolume = this.#rockableTrackVolume - 0.1;
+    //     } else {
+    //       clearInterval(this.#fadeInterval);
+    //       this.#fadeInterval = null;
+    //       this.#rockableTrackVolume = 0;
+    //     }
+    //   }, duration / 10);
+    // }
+  }
+
+  seek(offset: number) {
+    this.#howls.forEach((h) => h.seek(offset));
   }
 
   get #rockableTrackVolume() {
@@ -86,25 +88,29 @@ export class Playback {
     }
   }
 
-  // fadeOut(index: number, duration: number) {
-  //   if (!this.#fadeInterval) {
-  //     this.#fadeInterval = setInterval(() => {
-  //       if (this.#howls[index].volume() > 0.1) {
-  //         this.#howls[index].volume(this.#howls[index].volume() - 0.1);
-  //         console.log(this.#howls[index].volume());
-  //       } else {
-  //         console.log("cleared");
-  //         clearInterval(this.#fadeInterval);
-  //         this.#fadeInterval = null;
-  //         this.#howls[index].volume(0);
-  //       }
-  //     }, duration / 10);
-  //   } else {
-  //     this.#howls[index].volume(1);
-  //   }
-  // }
+  get elapsed() {
+    if (!this.#howls?.length) return 0;
+    return this.#howls[0].seek();
+  }
 
-  timings() {
-    return `${this.#howls[0].seek()} / ${this.#howls[0].duration()}`;
+  get duration() {
+    if (!this.#howls?.length) return 0;
+    return this.#howls[0].duration();
+  }
+
+  hasMode(mode: "band" | "free"): boolean {
+    if (mode === "band") {
+      return this.#manifest.modes.band !== undefined;
+    }
+
+    if (mode === "free") {
+      return this.#manifest.modes.free !== undefined;
+    }
+  }
+
+  getFreeModeSamples() {
+    if (this.#manifest.modes.free) {
+      return Object.keys(this.#manifest.modes.free);
+    }
   }
 }

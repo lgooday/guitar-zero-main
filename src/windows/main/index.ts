@@ -15,7 +15,7 @@ const createWindow = (): void => {
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 app.on("ready", createWindow);
@@ -23,6 +23,5 @@ app.on("ready", createWindow);
 server.init();
 
 server.eventEmitter.on("remote-input", (data) => {
-  console.log(data);
   mainWindow.webContents.send("playback:note", data);
 });

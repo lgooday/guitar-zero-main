@@ -1,6 +1,5 @@
 import udp, { Socket } from "dgram";
 import { EventEmitter } from "events";
-import { guitarEvent } from "../../tools/guitar-event";
 
 const port = 2222;
 

@@ -24,12 +24,7 @@ const config: ForgeConfig = {
     new AutoUnpackNativesPlugin({}),
     new WebpackPlugin({
       mainConfig,
-      // devContentSecurityPolicy: "connect-src 'self'",
-
-      // devContentSecurityPolicy: `default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline' data: https://cdnjs.cloudflare.com`,
-
-      devContentSecurityPolicy: `default-src 'self' 'unsafe-inline' data: http://127.0.0.1:8080; script-src 'self' 'unsafe-eval' 'unsafe-inline' data: https://cdnjs.cloudflare.com`,
-
+      devContentSecurityPolicy: `default-src 'self' 'unsafe-inline' data: http://192.168.1.15:48666 https://fonts.cdnfonts.com https://lh3.googleusercontent.com; script-src 'self' 'unsafe-eval' 'unsafe-inline' data: https://cdnjs.cloudflare.com`,
       renderer: {
         config: rendererConfig,
         entryPoints: [
