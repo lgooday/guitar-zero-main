@@ -47,7 +47,9 @@ void setup() {
 
 void send(char str[12]) {
   Serial.println(str);
-  udp.beginPacket("192.168.1.28", 2222);
+  // udp.beginPacket("192.168.1.19", 2222);
+  // udp.beginPacket("192.168.1.28", 2222);
+  udp.beginPacket("192.168.1.71", 2222);
   udp.write(str);
   udp.endPacket();
 }

@@ -6,9 +6,9 @@
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
-    "start:songs": "npx http-server ./songs --cors -c-1",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "make:pi": "npm run make -- --arch=armv7l --targets=@electron-forge/maker-deb",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
